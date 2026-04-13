@@ -3,10 +3,9 @@
 #include <Adafruit_BMP280.h>
 #include <Adafruit_BMP3XX.h>
 
-// Обекти от твоите кодове
 MPU9250_asukiaaa mpu;
-Adafruit_BMP280 bmp280; // BMP-то в GY-91
-Adafruit_BMP3XX bmp390;  // Твоят BMP390
+Adafruit_BMP280 bmp280;
+Adafruit_BMP3XX bmp390;
 
 bool launched = false;
 
@@ -14,7 +13,6 @@ void setup() {
   Serial.begin(115200);
   Wire.begin(21, 22);
 
-  // --- Setup от твоя GY-91 код ---
   mpu.setWire(&Wire);
   mpu.beginAccel();
   mpu.beginGyro();
@@ -23,7 +21,6 @@ void setup() {
     Serial.println("BMP280 error!");
   }
 
-  // --- Setup от твоя BMP390 код ---
   if (!bmp390.begin_I2C(0x77, &Wire)) {
     Serial.println("BMP390 not found! Check wiring.");
     while (1) delay(100);
@@ -38,7 +35,7 @@ void setup() {
 }
 
 void loop() {
-  // === MPU (GY-91) ===
+  // MPU (GY-91)
   mpu.accelUpdate();
   mpu.gyroUpdate();
 
@@ -48,17 +45,14 @@ void loop() {
   float gx = mpu.gyroX();
   float totalAccel = sqrt(ax * ax + ay * ay + az * az);
 
-  // === BMP280 (GY-91) ===
   float temp = bmp280.readTemperature();
   float pressure = bmp280.readPressure() / 100.0;
 
-  // === BMP390 (САМО Altitude) ===
   float altitude390 = 0;
   if (bmp390.performReading()) {
     altitude390 = bmp390.readAltitude(1013.25);
   }
 
-  // === ПРИНТИРАНЕ (Комбинирано) ===
   Serial.print("Accel: ");
   Serial.print(totalAccel);
 

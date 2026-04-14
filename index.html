@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROCKY!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <svg class="bg-ribbon" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <radialGradient id="planetGrad" cx="40%" cy="35%" r="60%">
+                <stop offset="0%" stop-color="#ffcc44"/>
+                <stop offset="40%" stop-color="#ff7700"/>
+                <stop offset="100%" stop-color="#cc2200"/>
+            </radialGradient>
+            <linearGradient id="ribbonGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#e040fb" stop-opacity="0.9"/>
+                <stop offset="50%" stop-color="#b470fa" stop-opacity="0.85"/>
+                <stop offset="100%" stop-color="#f472b6" stop-opacity="0.9"/>
+            </linearGradient>
+            <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="8" result="blur"/>
+                <feMerge>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="blur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+            </filter>
+        </defs>
+        <!-- wide soft glow layer -->
+        <path d="M -50 620 C 100 420, 250 680, 450 440 S 750 180, 950 380 S 1150 430, 1300 330"
+              stroke="url(#ribbonGrad)" stroke-width="60" fill="none" stroke-linecap="round" opacity="0.2"/>
+        <!-- main ribbon with glow -->
+        <path d="M -50 620 C 100 420, 250 680, 450 440 S 750 180, 950 380 S 1150 430, 1300 330"
+              stroke="url(#ribbonGrad)" stroke-width="28" fill="none" stroke-linecap="round" filter="url(#glow)" opacity="0.9"/>
+        <!-- bright core line -->
+        <path d="M -50 620 C 100 420, 250 680, 450 440 S 750 180, 950 380 S 1150 430, 1300 330"
+              stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.35"/>
+        <!-- sparkle dots -->
+        <circle cx="100" cy="490" r="2.5" fill="white" opacity="0.8"/>
+        <circle cx="270" cy="608" r="3.5" fill="white" opacity="0.75"/>
+        <circle cx="270" cy="608" r="8" fill="#e879f9" opacity="0.3"/>
+        <circle cx="450" cy="440" r="2" fill="white" opacity="0.9"/>
+        <circle cx="580" cy="335" r="4" fill="white" opacity="0.7"/>
+        <circle cx="580" cy="335" r="9" fill="#c084fc" opacity="0.22"/>
+        <circle cx="720" cy="205" r="2.5" fill="white" opacity="0.85"/>
+        <circle cx="830" cy="188" r="4" fill="white" opacity="0.8"/>
+        <circle cx="830" cy="188" r="9" fill="#f0abfc" opacity="0.28"/>
+        <circle cx="1000" cy="385" r="2.5" fill="white" opacity="0.7"/>
+        <circle cx="1150" cy="418" r="3" fill="white" opacity="0.75"/>
+        <circle cx="1150" cy="418" r="7" fill="#e879f9" opacity="0.25"/>
+        <!-- planet -->
+        <circle cx="1120" cy="760" r="220" fill="url(#planetGrad)" opacity="0.92"/>
+    </svg>
+
+    <div class="container">
+        <div class="header">
+            <h1>ROCKY!</h1>
+            <p>Мултифункционална хоби ракета</p>
+        </div>
+        <div class="cards-grid">
+            <div class="card">
+                <div><i class="fas fa-thermometer-half"></i> Температура</div>
+                <div class="value" id="t-val">--</div><span>°C</span>
+            </div>
+            <div class="card" id="beat-card">
+                <div><i class="fas fa-water"></i> Влажност</div>
+                <div class="value" id="b-val">--</div><span>%</span>
+            </div>
+            <div class="card" id="alarm-card">
+                <div><i class="fas fa-exclamation-triangle"></i> Налягане</div>
+                <div class="value" id="a-val">--</div><span>hPa</span>
+            </div>
+            <div class="card" id="dist-card">
+                <div><i class="fas fa-ruler-vertical"></i> Височина</div>
+                <div class="value" id="d-val">--</div><span>m</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateSensors() {
+            fetch('/data')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('t-val').textContent = data.temperature ?? '--';
+                    document.getElementById('b-val').textContent = data.humidity ?? '--';
+                    document.getElementById('a-val').textContent = data.pressure ?? '--';
+                    document.getElementById('d-val').textContent = data.altitude ?? '--';
+                })
+                .catch(() => {});
+        }
+
+        updateSensors();
+        setInterval(updateSensors, 1000);
+    </script>
+</body>
+</html>

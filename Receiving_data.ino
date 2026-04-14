@@ -7,6 +7,8 @@ typedef struct struct_message {
     float altitude;
     float totalAccel;
     float gyroX;
+    float lat;
+    float lng;
     float speed;
     int satellites;
 } struct_message;
@@ -19,24 +21,22 @@ void OnDataRecv(const esp_now_recv_info *info, const uint8_t *incomingData, int 
     Serial.println(len);
     Serial.print("Temp: ");
     Serial.println(myData.temperature);
-    Serial.print("Press: ");
+    Serial.print("Pressure: ");
     Serial.println(myData.pressure);
     Serial.print("Alt: ");
     Serial.println(myData.altitude);
-    // Serial.print("Acc: ");
-    // Serial.println(myData.totalAccel);
-    // Serial.print("Gyro: ");
-    // Serial.println(myData.gyroX);
-    // Serial.print("Latitude: ");
-    // Serial.println(myData.lat);
-    // Serial.print("Longtitute: ");
-    // Serial.println(myData.lng);
-    // Serial.print("Speed: ");
-    // Serial.println(myData.speed);
-    // Serial.print("Sat: ");
-    // Serial.println(myData.satellites);
-    // Serial.print("Launched: ");
-    // Serial.println(myData.launched);
+    Serial.print("Acc: ");
+    Serial.println(myData.totalAccel);
+    Serial.print("Gyro: ");
+    Serial.println(myData.gyroX);
+    Serial.print("Latitude: ");
+    Serial.println(myData.lat);
+    Serial.print("Longtitute: ");
+    Serial.println(myData.lng);
+    Serial.print("Speed: ");
+    Serial.println(myData.speed);
+    Serial.print("Sat: ");
+    Serial.println(myData.satellites);
     
     Serial.println();
 }

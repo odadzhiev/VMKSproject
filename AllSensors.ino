@@ -27,7 +27,6 @@ void setup() {
     Serial.println("BMP280 error!");
   }
 
-  // === SETUP ОТ ТВОЯ BMP390 ===
   if (!bmp390.begin_I2C(0x77, &Wire)) {
     Serial.println("BMP390 not found! Check wiring.");
     while (1) delay(100);

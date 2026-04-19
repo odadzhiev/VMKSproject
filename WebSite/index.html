@@ -101,19 +101,7 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAMed9K96VmeEi9HIaPfRF0ZDklQYqTZow",
-            databaseURL: "https://rocky-e02f5-default-rtdb.europe-west1.firebasedatabase.app/"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // ── Map setup ──
+    <script>
         const map = L.map('map', {
             center: [42.7, 23.3],
             zoom: 13,
@@ -137,45 +125,44 @@
         let trackPoints = [];
         let hasSnapped = false;
 
-        // ── Firebase real-time listener ──
-        onValue(ref(db, "sensor"), (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
+        setInterval(() => {
+            fetch('http://192.168.8.99:8080/data')
+                .then(r => r.json())
+                .then(d => {
+                    document.getElementById('t-val').textContent   = d.temperature?.toFixed(1)   ?? '--';
+                    document.getElementById('p-val').textContent   = d.pressure?.toFixed(1)      ?? '--';
+                    document.getElementById('alt-val').textContent = d.altitude?.toFixed(1)      ?? '--';
+                    document.getElementById('acc-val').textContent = d.acceleration?.toFixed(2)  ?? '--';
+                    document.getElementById('gyr-val').textContent = d.gyro?.toFixed(2)          ?? '--';
+                    document.getElementById('spd-val').textContent = d.speed?.toFixed(1)         ?? '--';
+                    document.getElementById('sat-val').textContent = d.satellites                ?? '--';
 
-            document.getElementById('t-val').textContent   = data.temp         ?? '--';
-            document.getElementById('p-val').textContent   = data.pressure     ?? '--';
-            document.getElementById('alt-val').textContent = data.altitude     ?? '--';
-            document.getElementById('acc-val').textContent = data.acceleration ?? '--';
-            document.getElementById('gyr-val').textContent = data.gyro         ?? '--';
-            document.getElementById('lat-val').textContent = data.lat          ?? '--';
-            document.getElementById('lng-val').textContent = data.lng          ?? '--';
-            document.getElementById('spd-val').textContent = data.speed        ?? '--';
-            document.getElementById('sat-val').textContent = data.satellites   ?? '--';
+                    const lat = parseFloat(d.lat);
+                    const lng = parseFloat(d.lng);
 
-            const lat = parseFloat(data.lat);
-            const lng = parseFloat(data.lng);
+                    if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+                        const pos = [lat, lng];
 
-            if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-                const pos = [lat, lng];
+                        if (!marker) {
+                            marker = L.marker(pos, { icon: rocketIcon }).addTo(map);
+                        } else {
+                            marker.setLatLng(pos);
+                        }
 
-                if (!marker) {
-                    marker = L.marker(pos, { icon: rocketIcon }).addTo(map);
-                } else {
-                    marker.setLatLng(pos);
-                }
+                        trackPoints.push(pos);
+                        polyline.setLatLngs(trackPoints);
 
-                trackPoints.push(pos);
-                polyline.setLatLngs(trackPoints);
+                        if (!hasSnapped) {
+                            map.setView(pos, 15);
+                            hasSnapped = true;
+                        }
 
-                if (!hasSnapped) {
-                    map.setView(pos, 15);
-                    hasSnapped = true;
-                }
-
-                document.getElementById('map-coords').textContent =
-                    `${lat.toFixed(6)}°, ${lng.toFixed(6)}°  ·  ${data.satellites ?? '--'} сателита`;
-            }
-        });
+                        document.getElementById('map-coords').textContent =
+                            `${lat.toFixed(6)}°, ${lng.toFixed(6)}°  ·  ${d.satellites ?? '--'} сателита`;
+                    }
+                })
+                .catch(() => {});
+        }, 2000);
     </script>
 </body>
 </html>

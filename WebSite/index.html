@@ -6,6 +6,7 @@
     <title>ROCKY!</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -31,16 +32,12 @@
                 </feMerge>
             </filter>
         </defs>
-        <!-- wide soft glow layer -->
         <path d="M -50 620 C 100 420, 250 680, 450 440 S 750 180, 950 380 S 1150 430, 1300 330"
               stroke="url(#ribbonGrad)" stroke-width="60" fill="none" stroke-linecap="round" opacity="0.2"/>
-        <!-- main ribbon with glow -->
         <path d="M -50 620 C 100 420, 250 680, 450 440 S 750 180, 950 380 S 1150 430, 1300 330"
               stroke="url(#ribbonGrad)" stroke-width="28" fill="none" stroke-linecap="round" filter="url(#glow)" opacity="0.9"/>
-        <!-- bright core line -->
         <path d="M -50 620 C 100 420, 250 680, 450 440 S 750 180, 950 380 S 1150 430, 1300 330"
               stroke="white" stroke-width="3" fill="none" stroke-linecap="round" opacity="0.35"/>
-        <!-- sparkle dots -->
         <circle cx="100" cy="490" r="2.5" fill="white" opacity="0.8"/>
         <circle cx="270" cy="608" r="3.5" fill="white" opacity="0.75"/>
         <circle cx="270" cy="608" r="8" fill="#e879f9" opacity="0.3"/>
@@ -53,7 +50,6 @@
         <circle cx="1000" cy="385" r="2.5" fill="white" opacity="0.7"/>
         <circle cx="1150" cy="418" r="3" fill="white" opacity="0.75"/>
         <circle cx="1150" cy="418" r="7" fill="#e879f9" opacity="0.25"/>
-        <!-- planet -->
         <circle cx="1120" cy="760" r="220" fill="url(#planetGrad)" opacity="0.92"/>
     </svg>
 
@@ -62,6 +58,7 @@
             <h1>ROCKY!</h1>
             <p>Мултифункционална хоби ракета</p>
         </div>
+
         <div class="cards-grid">
             <div class="card">
                 <div><i class="fas fa-thermometer-half"></i> Температура</div>
@@ -75,6 +72,10 @@
                 <div><i class="fas fa-ruler-vertical"></i> Височина</div>
                 <div class="value" id="alt-val">--</div><span>m</span>
             </div>
+            <div class="card card-center">
+                <div><i class="fas fa-satellite"></i> Сателити</div>
+                <div class="value" id="sat-val">--</div><span></span>
+            </div>
             <div class="card">
                 <div><i class="fas fa-rocket"></i> Ускорение</div>
                 <div class="value" id="acc-val">--</div><span>m/s²</span>
@@ -84,26 +85,52 @@
                 <div class="value" id="gyr-val">--</div><span>°/s</span>
             </div>
             <div class="card">
-                <div><i class="fas fa-map-marker-alt"></i> Ширина</div>
-                <div class="value" id="lat-val">--</div><span>°</span>
-            </div>
-            <div class="card">
-                <div><i class="fas fa-location-arrow"></i> Дължина</div>
-                <div class="value" id="lng-val">--</div><span>°</span>
-            </div>
-            <div class="card">
                 <div><i class="fas fa-wind"></i> Скорост</div>
                 <div class="value" id="spd-val">--</div><span>km/h</span>
             </div>
-            <div class="card">
-                <div><i class="fas fa-satellite"></i> Сателити</div>
-                <div class="value" id="sat-val">--</div><span></span>
-            </div>
+        </div>
+
+        <span id="lat-val" hidden></span>
+        <span id="lng-val" hidden></span>
+
+        <div id="map-section">
+            <div class="map-label"><i class="fas fa-map"></i> Траектория</div>
+            <div id="map"></div>
+            <div id="map-coords">Изчакване на GPS сигнал…</div>
         </div>
 
     </div>
 
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        const map = L.map('map', {
+            center: [42.7, 23.3],
+            zoom: 13,
+            zoomControl: true,
+            attributionControl: false
+        });
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19
+        }).addTo(map);
+
+        const rocketIcon = L.divIcon({
+            html: '<div class="rocket-marker">🚀</div>',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16],
+            className: ''
+        });
+
+        let marker = null;
+        let polyline = L.polyline([], {
+            color: '#e040fb',
+            weight: 2.5,
+            opacity: 0.75
+        }).addTo(map);
+
+        let trackPoints = [];
+        let hasSnapped = false;
+
         function updateSensors() {
             fetch('/data')
                 .then(r => r.json())
@@ -117,6 +144,30 @@
                     document.getElementById('lng-val').textContent = data.lng          ?? '--';
                     document.getElementById('spd-val').textContent = data.speed        ?? '--';
                     document.getElementById('sat-val').textContent = data.satellites   ?? '--';
+
+                    const lat = parseFloat(data.lat);
+                    const lng = parseFloat(data.lng);
+
+                    if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+                        const pos = [lat, lng];
+
+                        if (!marker) {
+                            marker = L.marker(pos, { icon: rocketIcon }).addTo(map);
+                        } else {
+                            marker.setLatLng(pos);
+                        }
+
+                        trackPoints.push(pos);
+                        polyline.setLatLngs(trackPoints);
+
+                        if (!hasSnapped) {
+                            map.setView(pos, 15);
+                            hasSnapped = true;
+                        }
+
+                        document.getElementById('map-coords').textContent =
+                            `${lat.toFixed(6)}°, ${lng.toFixed(6)}°  ·  ${data.satellites ?? '--'} сателита`;
+                    }
                 })
                 .catch(() => {});
         }

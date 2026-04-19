@@ -28,7 +28,7 @@ body {
     position: relative;
     z-index: 1;
     width: 100%;
-    max-width: 700px;
+    max-width: 960px;
     padding: 2rem;
     display: flex;
     flex-direction: column;
@@ -62,7 +62,7 @@ body {
 
 .cards-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
     width: 100%;
 }

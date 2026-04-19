@@ -67,19 +67,40 @@
                 <div><i class="fas fa-thermometer-half"></i> Температура</div>
                 <div class="value" id="t-val">--</div><span>°C</span>
             </div>
-            <div class="card" id="beat-card">
-                <div><i class="fas fa-water"></i> Влажност</div>
-                <div class="value" id="b-val">--</div><span>%</span>
+            <div class="card">
+                <div><i class="fas fa-tachometer-alt"></i> Налягане</div>
+                <div class="value" id="p-val">--</div><span>hPa</span>
             </div>
-            <div class="card" id="alarm-card">
-                <div><i class="fas fa-exclamation-triangle"></i> Налягане</div>
-                <div class="value" id="a-val">--</div><span>hPa</span>
-            </div>
-            <div class="card" id="dist-card">
+            <div class="card">
                 <div><i class="fas fa-ruler-vertical"></i> Височина</div>
-                <div class="value" id="d-val">--</div><span>m</span>
+                <div class="value" id="alt-val">--</div><span>m</span>
+            </div>
+            <div class="card">
+                <div><i class="fas fa-rocket"></i> Ускорение</div>
+                <div class="value" id="acc-val">--</div><span>m/s²</span>
+            </div>
+            <div class="card">
+                <div><i class="fas fa-sync-alt"></i> Жироскоп X</div>
+                <div class="value" id="gyr-val">--</div><span>°/s</span>
+            </div>
+            <div class="card">
+                <div><i class="fas fa-map-marker-alt"></i> Ширина</div>
+                <div class="value" id="lat-val">--</div><span>°</span>
+            </div>
+            <div class="card">
+                <div><i class="fas fa-location-arrow"></i> Дължина</div>
+                <div class="value" id="lng-val">--</div><span>°</span>
+            </div>
+            <div class="card">
+                <div><i class="fas fa-wind"></i> Скорост</div>
+                <div class="value" id="spd-val">--</div><span>km/h</span>
+            </div>
+            <div class="card">
+                <div><i class="fas fa-satellite"></i> Сателити</div>
+                <div class="value" id="sat-val">--</div><span></span>
             </div>
         </div>
+
     </div>
 
     <script>
@@ -87,10 +108,15 @@
             fetch('/data')
                 .then(r => r.json())
                 .then(data => {
-                    document.getElementById('t-val').textContent = data.temperature ?? '--';
-                    document.getElementById('b-val').textContent = data.humidity ?? '--';
-                    document.getElementById('a-val').textContent = data.pressure ?? '--';
-                    document.getElementById('d-val').textContent = data.altitude ?? '--';
+                    document.getElementById('t-val').textContent   = data.temperature  ?? '--';
+                    document.getElementById('p-val').textContent   = data.pressure     ?? '--';
+                    document.getElementById('alt-val').textContent = data.altitude     ?? '--';
+                    document.getElementById('acc-val').textContent = data.totalAccel   ?? '--';
+                    document.getElementById('gyr-val').textContent = data.gyroX        ?? '--';
+                    document.getElementById('lat-val').textContent = data.lat          ?? '--';
+                    document.getElementById('lng-val').textContent = data.lng          ?? '--';
+                    document.getElementById('spd-val').textContent = data.speed        ?? '--';
+                    document.getElementById('sat-val').textContent = data.satellites   ?? '--';
                 })
                 .catch(() => {});
         }

@@ -231,8 +231,11 @@ button:active {
 }
 
 .rocket-marker {
-    font-size: 28px;
-    line-height: 1;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ff6a00, #cc1a00);
+    box-shadow: 0 0 8px 3px rgba(255, 80, 0, 0.7);
 }
 
 #map-coords {

@@ -126,14 +126,14 @@
         let hasSnapped = false;
 
         setInterval(() => {
-            fetch('http://192.168.8.99:8080/data')
+            fetch('http://10.25.105.107:3000/data')
                 .then(r => r.json())
                 .then(d => {
-                    document.getElementById('t-val').textContent   = d.temperature?.toFixed(1)   ?? '--';
+                    document.getElementById('t-val').textContent   = d.temp?.toFixed(1) ?? d.temperature?.toFixed(1) ?? '--';
                     document.getElementById('p-val').textContent   = d.pressure?.toFixed(1)      ?? '--';
                     document.getElementById('alt-val').textContent = d.altitude?.toFixed(1)      ?? '--';
-                    document.getElementById('acc-val').textContent = d.acceleration?.toFixed(2)  ?? '--';
-                    document.getElementById('gyr-val').textContent = d.gyro?.toFixed(2)          ?? '--';
+                    document.getElementById('acc-val').textContent = d.accel?.toFixed(2)  ?? '--';
+                    document.getElementById('gyr-val').textContent = d.gyroX?.toFixed(2)      ?? '--';
                     document.getElementById('spd-val').textContent = d.speed?.toFixed(1)         ?? '--';
                     document.getElementById('sat-val').textContent = d.satellites                ?? '--';
 

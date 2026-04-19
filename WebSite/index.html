@@ -72,10 +72,6 @@
                 <div><i class="fas fa-ruler-vertical"></i> Височина</div>
                 <div class="value" id="alt-val">--</div><span>m</span>
             </div>
-            <div class="card card-center">
-                <div><i class="fas fa-satellite"></i> Сателити</div>
-                <div class="value" id="sat-val">--</div><span></span>
-            </div>
             <div class="card">
                 <div><i class="fas fa-rocket"></i> Ускорение</div>
                 <div class="value" id="acc-val">--</div><span>m/s²</span>
@@ -94,7 +90,10 @@
         <span id="lng-val" hidden></span>
 
         <div id="map-section">
-            <div class="map-label"><i class="fas fa-map"></i> Траектория</div>
+            <div class="map-header">
+                <div class="map-label"><i class="fas fa-map"></i> Траектория</div>
+                <div class="map-sat"><i class="fas fa-satellite"></i> <span id="sat-val">--</span> сателити</div>
+            </div>
             <div id="map"></div>
             <div id="map-coords">Изчакване на GPS сигнал…</div>
         </div>

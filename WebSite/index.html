@@ -102,7 +102,19 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAMed9K96VmeEi9HIaPfRF0ZDklQYqTZow",
+            databaseURL: "https://rocky-e02f5-default-rtdb.europe-west1.firebasedatabase.app/"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // ── Map setup ──
         const map = L.map('map', {
             center: [42.7, 23.3],
             zoom: 13,
@@ -122,58 +134,49 @@
         });
 
         let marker = null;
-        let polyline = L.polyline([], {
-            color: '#e040fb',
-            weight: 2.5,
-            opacity: 0.75
-        }).addTo(map);
-
+        let polyline = L.polyline([], { color: '#e040fb', weight: 2.5, opacity: 0.75 }).addTo(map);
         let trackPoints = [];
         let hasSnapped = false;
 
-        function updateSensors() {
-            fetch('/data')
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('t-val').textContent   = data.temperature  ?? '--';
-                    document.getElementById('p-val').textContent   = data.pressure     ?? '--';
-                    document.getElementById('alt-val').textContent = data.altitude     ?? '--';
-                    document.getElementById('acc-val').textContent = data.totalAccel   ?? '--';
-                    document.getElementById('gyr-val').textContent = data.gyroX        ?? '--';
-                    document.getElementById('lat-val').textContent = data.lat          ?? '--';
-                    document.getElementById('lng-val').textContent = data.lng          ?? '--';
-                    document.getElementById('spd-val').textContent = data.speed        ?? '--';
-                    document.getElementById('sat-val').textContent = data.satellites   ?? '--';
+        // ── Firebase real-time listener ──
+        onValue(ref(db, "sensor"), (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
 
-                    const lat = parseFloat(data.lat);
-                    const lng = parseFloat(data.lng);
+            document.getElementById('t-val').textContent   = data.temperature ?? '--';
+            document.getElementById('p-val').textContent   = data.pressure    ?? '--';
+            document.getElementById('alt-val').textContent = data.altitude    ?? '--';
+            document.getElementById('acc-val').textContent = data.totalAccel  ?? '--';
+            document.getElementById('gyr-val').textContent = data.gyroX       ?? '--';
+            document.getElementById('lat-val').textContent = data.lat         ?? '--';
+            document.getElementById('lng-val').textContent = data.lng         ?? '--';
+            document.getElementById('spd-val').textContent = data.speed       ?? '--';
+            document.getElementById('sat-val').textContent = data.satellites  ?? '--';
 
-                    if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-                        const pos = [lat, lng];
+            const lat = parseFloat(data.lat);
+            const lng = parseFloat(data.lng);
 
-                        if (!marker) {
-                            marker = L.marker(pos, { icon: rocketIcon }).addTo(map);
-                        } else {
-                            marker.setLatLng(pos);
-                        }
+            if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
+                const pos = [lat, lng];
 
-                        trackPoints.push(pos);
-                        polyline.setLatLngs(trackPoints);
+                if (!marker) {
+                    marker = L.marker(pos, { icon: rocketIcon }).addTo(map);
+                } else {
+                    marker.setLatLng(pos);
+                }
 
-                        if (!hasSnapped) {
-                            map.setView(pos, 15);
-                            hasSnapped = true;
-                        }
+                trackPoints.push(pos);
+                polyline.setLatLngs(trackPoints);
 
-                        document.getElementById('map-coords').textContent =
-                            `${lat.toFixed(6)}°, ${lng.toFixed(6)}°  ·  ${data.satellites ?? '--'} сателита`;
-                    }
-                })
-                .catch(() => {});
-        }
+                if (!hasSnapped) {
+                    map.setView(pos, 15);
+                    hasSnapped = true;
+                }
 
-        updateSensors();
-        setInterval(updateSensors, 1000);
+                document.getElementById('map-coords').textContent =
+                    `${lat.toFixed(6)}°, ${lng.toFixed(6)}°  ·  ${data.satellites ?? '--'} сателита`;
+            }
+        });
     </script>
 </body>
 </html>
